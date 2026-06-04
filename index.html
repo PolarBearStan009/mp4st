@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mayecho — Player</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080808;
+    --surface: #0f0f0f;
+    --border: #1e1e1e;
+    --accent: #c8a96e;
+    --accent-dim: #7a6340;
+    --text: #d4c9b0;
+    --text-muted: #5a5040;
+    --red: #8b2a2a;
+    --glow: rgba(200,169,110,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 4px),
+      repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(200,169,110,0.015) 40px, rgba(200,169,110,0.015) 41px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(200,169,110,0.04) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  header {
+    width: 100%;
+    max-width: 1100px;
+    padding: 2rem 2rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    z-index: 1;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 0.35em;
+    color: var(--accent);
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+
+  .logo span {
+    color: var(--text-muted);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    margin-left: 1rem;
+  }
+
+  .sigil {
+    width: 32px;
+    height: 32px;
+    opacity: 0.4;
+  }
+
+  main {
+    width: 100%;
+    max-width: 1100px;
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* ── no-url screen ── */
+  #idle-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+    padding: 4rem 0;
+    text-align: center;
+  }
+
+  .idle-glyph {
+    font-size: 48px;
+    opacity: 0.12;
+    animation: breathe 4s ease-in-out infinite;
+  }
+
+  @keyframes breathe {
+    0%,100% { opacity: 0.1; transform: scale(1); }
+    50% { opacity: 0.2; transform: scale(1.04); }
+  }
+
+  .idle-title {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .url-form {
+    display: flex;
+    gap: 0;
+    width: 100%;
+    max-width: 600px;
+    border: 1px solid var(--border);
+  }
+
+  .url-form input {
+    flex: 1;
+    background: var(--surface);
+    border: none;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    outline: none;
+  }
+
+  .url-form input::placeholder { color: var(--text-muted); }
+
+  .url-form input:focus {
+    background: #111;
+    box-shadow: inset 0 0 0 1px var(--accent-dim);
+  }
+
+  .url-form button {
+    background: var(--accent-dim);
+    border: none;
+    padding: 0.75rem 1.25rem;
+    color: var(--bg);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .url-form button:hover { background: var(--accent); }
+
+  /* ── player section ── */
+  #player-section { display: none; flex-direction: column; gap: 1.25rem; }
+
+  .player-wrap {
+    width: 100%;
+    background: #000;
+    border: 1px solid var(--border);
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+  }
+
+  .player-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(200,169,110,0.08);
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: #000;
+  }
+
+  /* ── custom controls ── */
+  .controls {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 0.75rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .progress-wrap {
+    position: relative;
+    height: 3px;
+    background: var(--border);
+    cursor: pointer;
+  }
+
+  .progress-wrap:hover { height: 5px; margin-top: -1px; }
+
+  #progress-bar {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.1s linear;
+    pointer-events: none;
+  }
+
+  #buffer-bar {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    background: var(--accent-dim);
+    opacity: 0.3;
+    width: 0%;
+    pointer-events: none;
+  }
+
+  .controls-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .ctrl-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0;
+    font-size: 16px;
+    line-height: 1;
+    transition: color 0.15s;
+    display: flex;
+    align-items: center;
+  }
+
+  .ctrl-btn:hover { color: var(--accent); }
+  .ctrl-btn.active { color: var(--accent); }
+
+  .time-display {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  .spacer { flex: 1; }
+
+  .volume-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 80px;
+    height: 3px;
+    background: var(--border);
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+  }
+
+  input[type=range]::-webkit-slider-runnable-track { background: var(--border); }
+
+  /* ── metadata row ── */
+  .meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-top: 1px solid var(--border);
+  }
+
+  #media-title {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 70%;
+  }
+
+  .corner-mark {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--text-muted);
+    opacity: 0.4;
+    text-transform: uppercase;
+  }
+
+  /* ── error state ── */
+  #error-msg {
+    display: none;
+    text-align: center;
+    padding: 3rem;
+    color: var(--red);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    border: 1px solid #2a1010;
+    background: #0d0808;
+  }
+
+  /* ── decorative corners ── */
+  .corner-tl, .corner-tr, .corner-bl, .corner-br {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    pointer-events: none;
+  }
+  .corner-tl { top: -1px; left: -1px; border-top: 1px solid var(--accent-dim); border-left: 1px solid var(--accent-dim); }
+  .corner-tr { top: -1px; right: -1px; border-top: 1px solid var(--accent-dim); border-right: 1px solid var(--accent-dim); }
+  .corner-bl { bottom: -1px; left: -1px; border-bottom: 1px solid var(--accent-dim); border-left: 1px solid var(--accent-dim); }
+  .corner-br { bottom: -1px; right: -1px; border-bottom: 1px solid var(--accent-dim); border-right: 1px solid var(--accent-dim); }
+
+  footer {
+    width: 100%;
+    max-width: 1100px;
+    padding: 1rem 2rem 1.5rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  footer span {
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.2em;
+    opacity: 0.5;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Mayecho <span>// media</span></div>
+  <svg class="sigil" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="16" cy="16" r="13" stroke="#c8a96e" stroke-width="0.5"/>
+    <circle cx="16" cy="16" r="7" stroke="#c8a96e" stroke-width="0.5"/>
+    <line x1="16" y1="3" x2="16" y2="29" stroke="#c8a96e" stroke-width="0.5"/>
+    <line x1="3" y1="16" x2="29" y2="16" stroke="#c8a96e" stroke-width="0.5"/>
+    <line x1="7" y1="7" x2="25" y2="25" stroke="#c8a96e" stroke-width="0.5"/>
+    <line x1="25" y1="7" x2="7" y2="25" stroke="#c8a96e" stroke-width="0.5"/>
+  </svg>
+</header>
+
+<main>
+
+  <!-- idle / manual URL entry -->
+  <div id="idle-screen">
+    <div class="idle-glyph">⛧</div>
+    <div class="idle-title">no media summoned</div>
+    <form class="url-form" onsubmit="loadFromForm(event)">
+      <input type="text" id="manual-url" placeholder="paste direct media url..." autocomplete="off" spellcheck="false">
+      <button type="submit">invoke</button>
+    </form>
+  </div>
+
+  <!-- player -->
+  <div id="player-section">
+    <div class="player-wrap" id="player-wrap">
+      <div class="corner-tl"></div>
+      <div class="corner-tr"></div>
+      <div class="corner-bl"></div>
+      <div class="corner-br"></div>
+      <video id="vid" preload="metadata"></video>
+    </div>
+
+    <div class="controls" id="controls">
+      <div class="progress-wrap" id="progress-wrap">
+        <div id="buffer-bar"></div>
+        <div id="progress-bar"></div>
+      </div>
+
+      <div class="controls-row">
+        <button class="ctrl-btn" id="play-btn" onclick="togglePlay()" title="play/pause">
+          <svg id="play-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="pause-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+        </button>
+
+        <button class="ctrl-btn" onclick="skip(-10)" title="-10s">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/><text x="9" y="16" font-size="6" fill="currentColor">10</text></svg>
+        </button>
+
+        <button class="ctrl-btn" onclick="skip(10)" title="+10s">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/></svg>
+        </button>
+
+        <span class="time-display" id="time-display">0:00 / 0:00</span>
+
+        <div class="spacer"></div>
+
+        <div class="volume-wrap">
+          <button class="ctrl-btn" id="mute-btn" onclick="toggleMute()" title="mute">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+          </button>
+          <input type="range" id="vol-slider" min="0" max="1" step="0.02" value="1" oninput="setVolume(this.value)">
+        </div>
+
+        <button class="ctrl-btn" onclick="toggleFullscreen()" title="fullscreen">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="meta-row">
+      <span id="media-title">—</span>
+      <span class="corner-mark">Mayecho</span>
+    </div>
+  </div>
+
+  <div id="error-msg">⚠ failed to load media — check the url or cors policy</div>
+
+</main>
+
+<footer>
+  <span>Mayecho // internal</span>
+  <span>media player v1</span>
+</footer>
+
+<script>
+  const vid = document.getElementById('vid');
+  const playIcon = document.getElementById('play-icon');
+  const pauseIcon = document.getElementById('pause-icon');
+  const progressBar = document.getElementById('progress-bar');
+  const bufferBar = document.getElementById('buffer-bar');
+  const timeDisplay = document.getElementById('time-display');
+  const mediaTitle = document.getElementById('media-title');
+
+  function getParam(key) {
+    return new URLSearchParams(window.location.search).get(key);
+  }
+
+  function fmt(s) {
+    if (isNaN(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60).toString().padStart(2, '0');
+    return `${m}:${sec}`;
+  }
+
+  function loadURL(url) {
+    if (!url) return;
+    document.getElementById('idle-screen').style.display = 'none';
+    document.getElementById('player-section').style.display = 'flex';
+    document.getElementById('error-msg').style.display = 'none';
+
+    vid.src = url;
+    vid.load();
+
+    const name = decodeURIComponent(url.split('/').pop().split('?')[0]) || url;
+    mediaTitle.textContent = name;
+    document.title = `${name} — Mayecho`;
+
+    vid.play().catch(() => {});
+  }
+
+  function loadFromForm(e) {
+    e.preventDefault();
+    const url = document.getElementById('manual-url').value.trim();
+    if (url) loadURL(url);
+  }
+
+  const urlParam = getParam('url');
+  if (urlParam) loadURL(urlParam);
+
+  function togglePlay() {
+    if (vid.paused) { vid.play(); } else { vid.pause(); }
+  }
+
+  function skip(s) { vid.currentTime = Math.max(0, vid.currentTime + s); }
+
+  function setVolume(v) {
+    vid.volume = v;
+    vid.muted = v == 0;
+  }
+
+  function toggleMute() {
+    vid.muted = !vid.muted;
+    document.getElementById('vol-slider').value = vid.muted ? 0 : vid.volume;
+  }
+
+  function toggleFullscreen() {
+    const wrap = document.getElementById('player-wrap');
+    if (!document.fullscreenElement) wrap.requestFullscreen();
+    else document.exitFullscreen();
+  }
+
+  vid.addEventListener('play', () => {
+    playIcon.style.display = 'none';
+    pauseIcon.style.display = '';
+  });
+
+  vid.addEventListener('pause', () => {
+    playIcon.style.display = '';
+    pauseIcon.style.display = 'none';
+  });
+
+  vid.addEventListener('timeupdate', () => {
+    if (!vid.duration) return;
+    const pct = (vid.currentTime / vid.duration) * 100;
+    progressBar.style.width = pct + '%';
+    timeDisplay.textContent = `${fmt(vid.currentTime)} / ${fmt(vid.duration)}`;
+  });
+
+  vid.addEventListener('progress', () => {
+    if (vid.buffered.length > 0 && vid.duration) {
+      bufferBar.style.width = (vid.buffered.end(vid.buffered.length - 1) / vid.duration * 100) + '%';
+    }
+  });
+
+  vid.addEventListener('error', () => {
+    document.getElementById('player-section').style.display = 'none';
+    document.getElementById('error-msg').style.display = 'block';
+  });
+
+  vid.addEventListener('ended', () => {
+    playIcon.style.display = '';
+    pauseIcon.style.display = 'none';
+  });
+
+  const wrap = document.getElementById('progress-wrap');
+  wrap.addEventListener('click', e => {
+    const r = wrap.getBoundingClientRect();
+    vid.currentTime = ((e.clientX - r.left) / r.width) * vid.duration;
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+    if (e.code === 'ArrowLeft') skip(-10);
+    if (e.code === 'ArrowRight') skip(10);
+    if (e.code === 'KeyM') toggleMute();
+    if (e.code === 'KeyF') toggleFullscreen();
+  });
+</script>
+</body>
+</html>
