@@ -1493,7 +1493,8 @@
     }
   });
 
-  vid.addEventListener('error', showError);
+  // Only show error for the native video element, not when YouTube is active
+  vid.addEventListener('error', () => { if (!isYouTube) showError(); });
 
   // PiP state sync
   vid.addEventListener('enterpictureinpicture', () => document.getElementById('pip-btn').classList.add('active'));
