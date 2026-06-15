@@ -7,20 +7,22 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
+  /* ── Design tokens ── */
   :root {
-    --bg: #080808;
-    --surface: #0f0f0f;
-    --border: #1e1e1e;
-    --accent: #c8a96e;
+    --bg:         #080808;
+    --surface:    #0f0f0f;
+    --border:     #1e1e1e;
+    --accent:     #c8a96e;
     --accent-dim: #7a6340;
-    --text: #d4c9b0;
+    --text:       #d4c9b0;
     --text-muted: #5a5040;
-    --red: #8b2a2a;
-    --glow: rgba(200,169,110,0.15);
+    --red:        #8b2a2a;
+    --glow:       rgba(200,169,110,0.15);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
+  /* ── Base layout ── */
   body {
     background: var(--bg);
     color: var(--text);
@@ -32,6 +34,7 @@
     overflow-x: hidden;
   }
 
+  /* Subtle scanline + grid overlay */
   body::before {
     content: '';
     position: fixed;
@@ -43,6 +46,7 @@
     z-index: 0;
   }
 
+  /* Soft top glow */
   body::after {
     content: '';
     position: fixed;
@@ -52,6 +56,7 @@
     z-index: 0;
   }
 
+  /* ── Header ── */
   header {
     width: 100%;
     max-width: 1100px;
@@ -80,12 +85,9 @@
     margin-left: 1rem;
   }
 
-  .sigil {
-    width: 32px;
-    height: 32px;
-    opacity: 0.4;
-  }
+  .sigil { width: 32px; height: 32px; opacity: 0.4; }
 
+  /* ── Main content area ── */
   main {
     width: 100%;
     max-width: 1100px;
@@ -98,7 +100,7 @@
     gap: 1.5rem;
   }
 
-  /* ── no-url screen ── */
+  /* ── Idle / URL entry screen ── */
   #idle-screen {
     flex: 1;
     display: flex;
@@ -117,8 +119,8 @@
   }
 
   @keyframes breathe {
-    0%,100% { opacity: 0.1; transform: scale(1); }
-    50% { opacity: 0.2; transform: scale(1.04); }
+    0%, 100% { opacity: 0.1; transform: scale(1); }
+    50%       { opacity: 0.2; transform: scale(1.04); }
   }
 
   .idle-title {
@@ -131,7 +133,6 @@
 
   .url-form {
     display: flex;
-    gap: 0;
     width: 100%;
     max-width: 600px;
     border: 1px solid var(--border);
@@ -169,7 +170,7 @@
 
   .url-form button:hover { background: var(--accent); }
 
-  /* ── player section ── */
+  /* ── Video player ── */
   #player-section { display: none; flex-direction: column; gap: 1.25rem; }
 
   .player-wrap {
@@ -181,6 +182,7 @@
     overflow: hidden;
   }
 
+  /* Inner accent border overlay (decorative) */
   .player-wrap::before {
     content: '';
     position: absolute;
@@ -190,14 +192,24 @@
     z-index: 10;
   }
 
-  video {
-    width: 100%;
-    height: 100%;
-    display: block;
-    background: #000;
-  }
+  video { width: 100%; height: 100%; display: block; background: #000; }
 
-  /* ── custom controls ── */
+  /* ── Decorative corner brackets on the player ── */
+  .corner-tl, .corner-tr, .corner-bl, .corner-br {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    pointer-events: none;
+    border-color: var(--accent-dim);
+    border-style: solid;
+    border-width: 0;
+  }
+  .corner-tl { top: -1px;    left: -1px;  border-top-width: 1px;    border-left-width: 1px; }
+  .corner-tr { top: -1px;    right: -1px; border-top-width: 1px;    border-right-width: 1px; }
+  .corner-bl { bottom: -1px; left: -1px;  border-bottom-width: 1px; border-left-width: 1px; }
+  .corner-br { bottom: -1px; right: -1px; border-bottom-width: 1px; border-right-width: 1px; }
+
+  /* ── Controls bar ── */
   .controls {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -207,6 +219,7 @@
     gap: 0.6rem;
   }
 
+  /* Progress / seek bar */
   .progress-wrap {
     position: relative;
     height: 3px;
@@ -224,6 +237,7 @@
     pointer-events: none;
   }
 
+  /* Buffer indicator (behind progress) */
   #buffer-bar {
     position: absolute;
     top: 0; left: 0;
@@ -240,6 +254,7 @@
     gap: 1rem;
   }
 
+  /* Icon buttons */
   .ctrl-btn {
     background: none;
     border: none;
@@ -253,7 +268,7 @@
     align-items: center;
   }
 
-  .ctrl-btn:hover { color: var(--accent); }
+  .ctrl-btn:hover  { color: var(--accent); }
   .ctrl-btn.active { color: var(--accent); }
 
   .time-display {
@@ -265,12 +280,9 @@
 
   .spacer { flex: 1; }
 
-  .volume-wrap {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
+  .volume-wrap { display: flex; align-items: center; gap: 0.5rem; }
 
+  /* Volume slider */
   input[type=range] {
     -webkit-appearance: none;
     width: 80px;
@@ -291,7 +303,7 @@
 
   input[type=range]::-webkit-slider-runnable-track { background: var(--border); }
 
-  /* ── metadata row ── */
+  /* ── Metadata row (filename + branding) ── */
   .meta-row {
     display: flex;
     align-items: center;
@@ -319,7 +331,7 @@
     text-transform: uppercase;
   }
 
-  /* ── error state ── */
+  /* ── Error state ── */
   #error-msg {
     display: none;
     text-align: center;
@@ -331,18 +343,7 @@
     background: #0d0808;
   }
 
-  /* ── decorative corners ── */
-  .corner-tl, .corner-tr, .corner-bl, .corner-br {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    pointer-events: none;
-  }
-  .corner-tl { top: -1px; left: -1px; border-top: 1px solid var(--accent-dim); border-left: 1px solid var(--accent-dim); }
-  .corner-tr { top: -1px; right: -1px; border-top: 1px solid var(--accent-dim); border-right: 1px solid var(--accent-dim); }
-  .corner-bl { bottom: -1px; left: -1px; border-bottom: 1px solid var(--accent-dim); border-left: 1px solid var(--accent-dim); }
-  .corner-br { bottom: -1px; right: -1px; border-bottom: 1px solid var(--accent-dim); border-right: 1px solid var(--accent-dim); }
-
+  /* ── Footer ── */
   footer {
     width: 100%;
     max-width: 1100px;
@@ -367,19 +368,20 @@
 
 <header>
   <div class="logo">Mayecho <span>// media</span></div>
+  <!-- Decorative sigil SVG -->
   <svg class="sigil" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="16" cy="16" r="13" stroke="#c8a96e" stroke-width="0.5"/>
-    <circle cx="16" cy="16" r="7" stroke="#c8a96e" stroke-width="0.5"/>
-    <line x1="16" y1="3" x2="16" y2="29" stroke="#c8a96e" stroke-width="0.5"/>
-    <line x1="3" y1="16" x2="29" y2="16" stroke="#c8a96e" stroke-width="0.5"/>
-    <line x1="7" y1="7" x2="25" y2="25" stroke="#c8a96e" stroke-width="0.5"/>
-    <line x1="25" y1="7" x2="7" y2="25" stroke="#c8a96e" stroke-width="0.5"/>
+    <circle cx="16" cy="16" r="7"  stroke="#c8a96e" stroke-width="0.5"/>
+    <line x1="16" y1="3"  x2="16" y2="29" stroke="#c8a96e" stroke-width="0.5"/>
+    <line x1="3"  y1="16" x2="29" y2="16" stroke="#c8a96e" stroke-width="0.5"/>
+    <line x1="7"  y1="7"  x2="25" y2="25" stroke="#c8a96e" stroke-width="0.5"/>
+    <line x1="25" y1="7"  x2="7"  y2="25" stroke="#c8a96e" stroke-width="0.5"/>
   </svg>
 </header>
 
 <main>
 
-  <!-- idle / manual URL entry -->
+  <!-- Shown when no media is loaded yet -->
   <div id="idle-screen">
     <div class="idle-glyph">⛧</div>
     <div class="idle-title">no media summoned</div>
@@ -389,9 +391,10 @@
     </form>
   </div>
 
-  <!-- player -->
+  <!-- Video player (hidden until a URL is loaded) -->
   <div id="player-section">
     <div class="player-wrap" id="player-wrap">
+      <!-- Corner bracket decorations -->
       <div class="corner-tl"></div>
       <div class="corner-tr"></div>
       <div class="corner-bl"></div>
@@ -399,22 +402,27 @@
       <video id="vid" preload="metadata"></video>
     </div>
 
-    <div class="controls" id="controls">
+    <!-- Custom controls -->
+    <div class="controls">
+      <!-- Seek bar (click to jump) -->
       <div class="progress-wrap" id="progress-wrap">
         <div id="buffer-bar"></div>
         <div id="progress-bar"></div>
       </div>
 
       <div class="controls-row">
+        <!-- Play / Pause -->
         <button class="ctrl-btn" id="play-btn" onclick="togglePlay()" title="play/pause">
-          <svg id="play-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <svg id="play-icon"  width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
           <svg id="pause-icon" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
         </button>
 
+        <!-- Rewind 10s -->
         <button class="ctrl-btn" onclick="skip(-10)" title="-10s">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/><text x="9" y="16" font-size="6" fill="currentColor">10</text></svg>
         </button>
 
+        <!-- Skip forward 10s -->
         <button class="ctrl-btn" onclick="skip(10)" title="+10s">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/></svg>
         </button>
@@ -423,6 +431,7 @@
 
         <div class="spacer"></div>
 
+        <!-- Volume control -->
         <div class="volume-wrap">
           <button class="ctrl-btn" id="mute-btn" onclick="toggleMute()" title="mute">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
@@ -430,12 +439,14 @@
           <input type="range" id="vol-slider" min="0" max="1" step="0.02" value="1" oninput="setVolume(this.value)">
         </div>
 
+        <!-- Fullscreen -->
         <button class="ctrl-btn" onclick="toggleFullscreen()" title="fullscreen">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
         </button>
       </div>
     </div>
 
+    <!-- Filename + branding -->
     <div class="meta-row">
       <span id="media-title">—</span>
       <span class="corner-mark">Mayecho</span>
@@ -452,118 +463,132 @@
 </footer>
 
 <script>
-  const vid = document.getElementById('vid');
-  const playIcon = document.getElementById('play-icon');
-  const pauseIcon = document.getElementById('pause-icon');
+  // DOM refs
+  const vid         = document.getElementById('vid');
+  const playIcon    = document.getElementById('play-icon');
+  const pauseIcon   = document.getElementById('pause-icon');
   const progressBar = document.getElementById('progress-bar');
-  const bufferBar = document.getElementById('buffer-bar');
+  const bufferBar   = document.getElementById('buffer-bar');
   const timeDisplay = document.getElementById('time-display');
-  const mediaTitle = document.getElementById('media-title');
+  const mediaTitle  = document.getElementById('media-title');
 
-  function getParam(key) {
-    return new URLSearchParams(window.location.search).get(key);
-  }
-
+  // Format seconds → "M:SS"
   function fmt(s) {
     if (isNaN(s)) return '0:00';
-    const m = Math.floor(s / 60);
+    const m   = Math.floor(s / 60);
     const sec = Math.floor(s % 60).toString().padStart(2, '0');
     return `${m}:${sec}`;
   }
 
+  // Sync the play/pause button icon to the actual video state
+  function syncPlayIcon() {
+    const playing = !vid.paused;
+    playIcon.style.display  = playing ? 'none' : '';
+    pauseIcon.style.display = playing ? ''     : 'none';
+  }
+
+  // Load a media URL into the player
   function loadURL(url) {
     if (!url) return;
-    document.getElementById('idle-screen').style.display = 'none';
+
+    document.getElementById('idle-screen').style.display    = 'none';
     document.getElementById('player-section').style.display = 'flex';
-    document.getElementById('error-msg').style.display = 'none';
+    document.getElementById('error-msg').style.display      = 'none';
 
     vid.src = url;
     vid.load();
 
+    // Use the filename from the URL as the display title
     const name = decodeURIComponent(url.split('/').pop().split('?')[0]) || url;
     mediaTitle.textContent = name;
     document.title = `${name} — Mayecho`;
 
-    vid.play().catch(() => {});
+    vid.play().catch(() => {}); // autoplay may be silently blocked by the browser
   }
 
+  // Handle the manual URL form submission
   function loadFromForm(e) {
     e.preventDefault();
     const url = document.getElementById('manual-url').value.trim();
     if (url) loadURL(url);
   }
 
-  const urlParam = getParam('url');
+  // Auto-load if a ?url= param is present in the page URL
+  const urlParam = new URLSearchParams(window.location.search).get('url');
   if (urlParam) loadURL(urlParam);
 
+  // Toggle play / pause
   function togglePlay() {
-    if (vid.paused) { vid.play(); } else { vid.pause(); }
+    vid.paused ? vid.play() : vid.pause();
   }
 
-  function skip(s) { vid.currentTime = Math.max(0, vid.currentTime + s); }
+  // Seek forward or backward by `seconds`
+  function skip(seconds) {
+    vid.currentTime = Math.max(0, vid.currentTime + seconds);
+  }
 
+  // Set volume (0–1); also mute if dragged to zero
   function setVolume(v) {
     vid.volume = v;
-    vid.muted = v == 0;
+    vid.muted  = (v == 0);
   }
 
+  // Toggle mute and sync the slider position
   function toggleMute() {
     vid.muted = !vid.muted;
     document.getElementById('vol-slider').value = vid.muted ? 0 : vid.volume;
   }
 
+  // Toggle fullscreen on the player wrapper element
   function toggleFullscreen() {
     const wrap = document.getElementById('player-wrap');
     if (!document.fullscreenElement) wrap.requestFullscreen();
     else document.exitFullscreen();
   }
 
-  vid.addEventListener('play', () => {
-    playIcon.style.display = 'none';
-    pauseIcon.style.display = '';
-  });
+  // -- Video event listeners --
 
-  vid.addEventListener('pause', () => {
-    playIcon.style.display = '';
-    pauseIcon.style.display = 'none';
-  });
+  // Keep the play/pause icon in sync
+  vid.addEventListener('play',  syncPlayIcon);
+  vid.addEventListener('pause', syncPlayIcon);
+  vid.addEventListener('ended', syncPlayIcon);
 
+  // Update the progress bar and timestamp as the video plays
   vid.addEventListener('timeupdate', () => {
     if (!vid.duration) return;
     const pct = (vid.currentTime / vid.duration) * 100;
-    progressBar.style.width = pct + '%';
-    timeDisplay.textContent = `${fmt(vid.currentTime)} / ${fmt(vid.duration)}`;
+    progressBar.style.width    = pct + '%';
+    timeDisplay.textContent    = `${fmt(vid.currentTime)} / ${fmt(vid.duration)}`;
   });
 
+  // Update the buffer indicator as data loads in
   vid.addEventListener('progress', () => {
     if (vid.buffered.length > 0 && vid.duration) {
-      bufferBar.style.width = (vid.buffered.end(vid.buffered.length - 1) / vid.duration * 100) + '%';
+      const bufferedEnd      = vid.buffered.end(vid.buffered.length - 1);
+      bufferBar.style.width  = (bufferedEnd / vid.duration * 100) + '%';
     }
   });
 
+  // Show error message if the video fails to load
   vid.addEventListener('error', () => {
     document.getElementById('player-section').style.display = 'none';
-    document.getElementById('error-msg').style.display = 'block';
+    document.getElementById('error-msg').style.display      = 'block';
   });
 
-  vid.addEventListener('ended', () => {
-    playIcon.style.display = '';
-    pauseIcon.style.display = 'none';
+  // Click on the seek bar to jump to that position
+  document.getElementById('progress-wrap').addEventListener('click', e => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    vid.currentTime = ((e.clientX - rect.left) / rect.width) * vid.duration;
   });
 
-  const wrap = document.getElementById('progress-wrap');
-  wrap.addEventListener('click', e => {
-    const r = wrap.getBoundingClientRect();
-    vid.currentTime = ((e.clientX - r.left) / r.width) * vid.duration;
-  });
-
+  // Keyboard shortcuts (disabled when typing in the URL input)
   document.addEventListener('keydown', e => {
     if (e.target.tagName === 'INPUT') return;
-    if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
-    if (e.code === 'ArrowLeft') skip(-10);
+    if (e.code === 'Space')      { e.preventDefault(); togglePlay(); }
+    if (e.code === 'ArrowLeft')  skip(-10);
     if (e.code === 'ArrowRight') skip(10);
-    if (e.code === 'KeyM') toggleMute();
-    if (e.code === 'KeyF') toggleFullscreen();
+    if (e.code === 'KeyM')       toggleMute();
+    if (e.code === 'KeyF')       toggleFullscreen();
   });
 </script>
 </body>
